@@ -160,9 +160,12 @@ def inferencesTotal(mot1, relation, mot2, is_egalite, use_egalite, use_ask, use_
         for exp in explications : # exp = [mot1, iprim, relationString, mot2, noteExplication, pourcentage]
             # Soit on veut les égalité, soit si on a bien pas d'egalité
             if is_egalite or (exp[0] != exp[1] and exp[1] != exp[3]) :
-                # Si c'est une deduction ou une induction
-                if [x for x in exp] in relations_triees1 or [x for x in exp] in relations_triees2 :
+                # Si c'est une deduction
+                if [x for x in exp] in relations_triees1 :
                     print(f"   * {cpt} * un(e)/du {exp[0]} est un(e) {exp[1]}, et un(e)/du {exp[1]} {relationString} {exp[3]} !!!")
+                # Si c'est une induction
+                elif [x for x in exp] in relations_triees2 :
+                    print(f"   * {cpt} * un(e)/du {exp[1]} est un(e) {exp[0]}, et un(e)/du {exp[1]} {relationString} {exp[3]} !!!")
                 # Si c'est une transitivité
                 else :
                     print(f"   * {cpt} * un(e)/du {exp[0]} {relationString} {exp[1]}, et un(e)/du {exp[1]} {relationString} {exp[3]} !!!")
@@ -241,10 +244,14 @@ def inferencesTotal(mot1, relation, mot2, is_egalite, use_egalite, use_ask, use_
                 # Soit on veut les égalité, Soit on a bien pas d'egalité
                 if is_egalite or ( e1[0] != e1[3] and e1[2] != e1[3] and e2[0] != e2[3] and e2[2] != e2[3] and et1[0] != et1[3] and et1[2] != et1[3] and et2[0] != et2[3] and et2[2] != et2[3]) :
                     
-                    # Si c'est une deduction ou une induction de relation sortante
+                    # Si c'est une deduction de relation sortante
                     print(f"   * un(e)/du {e1[0]} est un(e)/du {e1[3]}, mais un(e)/du {e1[3]} {relationStringNeg} {e1[2]} !!!")
-                    # Si c'est une deduction ou une induction de relation entrante
+                    # Si c'est une deduction de relation entrante
                     print(f"   * un(e)/du {e2[3]} {relationString} {e2[2]}, mais un(e)/du {e2[0]} n'est pas un(e)/du {e2[3]} !!!")
+                    # Si c'est une induction de relation sortante
+                    print(f"   * un(e)/du {e1[3]} est un(e)/du {e1[0]}, mais un(e)/du {e1[3]} {relationStringNeg} {e1[2]} !!!")
+                    # Si c'est une induction de relation entrante
+                    print(f"   * un(e)/du {e2[3]} {relationString} {e2[2]}, mais un(e)/du {e2[3]} n'est pas un(e)/du {e2[0]} !!!")
                     # Si c'est une transitivité de relation sortante
                     print(f"   * un(e)/du {et1[0]} {relationString} {et1[3]}, mais un(e)/du {et1[3]} {relationStringNeg} {et1[2]} !!!")
                     # Si c'est une transitivité de relation entrante
