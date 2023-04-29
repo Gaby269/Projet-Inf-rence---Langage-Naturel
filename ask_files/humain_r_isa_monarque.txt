@@ -1,0 +1,3 @@
+oui
+127
+inférence depuis 'hypo : reine r_isa monarque' ; 

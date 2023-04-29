@@ -1,6 +1,6 @@
 import os
 import re
-from parser import rechercheDUMP, formaterDico, parserDico
+from parser import rechercheDUMP, formaterDico, parserDico, rechercheDUMPreponse, motFormater
 from utilities import *
 from heuristiques import *
 
@@ -23,7 +23,6 @@ def suiteInference(dico1_form, dico2_form) :
     # Recup les elements c de dico1
     entite_dico1 = dico1_form["2;e;eid;'name';type;w;'formated name'"]
     entite_dico2 = dico2_form["2;e;eid;'name';type;w;'formated name'"]
-    #print("ENTITE 1 :",entite_dico1) print("\n\n") print("ENTITE 2 : ",entite_dico2)
     print("\n** Recuperer les entites fini ** ")
 
     # Intersection des entités entre dico1 et dico2 pour obtenir les C valables
@@ -142,11 +141,19 @@ def inferencesTotal(mot1, relation, mot2, is_egalite, use_egalite, use_ask, use_
     relationString = traductionChiffreToFrancais(relation)
     relationStringNeg = traductionChiffreToFrancaisNeg(relation)
 
+    # Recherche de la vrai réponse
+    rechercheDUMPreponse(mot1, relation, mot2)
+    chemin = os.path.join("reponse_files", f"reponse_{motFormater(mot1)}_{relation}_{motFormater(mot2)}.txt")
+    reponse = 0
+    if (os.path.exists(chemin)):
+        with open(chemin, "r", encoding="utf-8") as f:
+            reponse = (f.readlines())[0]
+    
     # La relation serait alors vrai
-    if is_oui1 or is_oui2 or is_oui3 :
+    if reponse == "True" or (reponse == "Pas" and (is_oui1 or is_oui2 or is_oui3)):
         
         explications = relations_triees1 + relations_triees2 + relations_triees3
-        #print(explications)
+        # print(explications)
         # Suppression des doublons dans explications
         explications = list(set(tuple(exp) for exp in explications))
         # Tri du tableau en fonction des notes des explications, puis en fonction des poids d'annotation si égalité
@@ -179,7 +186,7 @@ def inferencesTotal(mot1, relation, mot2, is_egalite, use_egalite, use_ask, use_
         print("\n\n")
         
     # La relation serait alors fausse
-    else : 
+    elif reponse == "False" or (reponse == "Pas" and (is_oui1==False  or is_oui2==False or is_oui3==False)):
         tab_entite1 = dicoDeduction1["2;e;eid;'name';type;w;'formated name'"] + dicoInduction1["2;e;eid;'name';type;w;'formated name'"] # Tableau d'entite des relation sortante de deduction et induction
         tab_entite2 = dicoDeduction2["2;e;eid;'name';type;w;'formated name'"] + dicoInduction2["2;e;eid;'name';type;w;'formated name'"] # Tableau d'entite des relation entrante de deduction et induction
         entiteTransitivite1 = dicoTransitivite1["2;e;eid;'name';type;w;'formated name'"] # tableau entite de transitivite en relation sortante
@@ -263,10 +270,3 @@ def inferencesTotal(mot1, relation, mot2, is_egalite, use_egalite, use_ask, use_
                 cpt += 1
                 if cpt > 5 :
                     break
-
-
-if __name__ == "__main__":
-    # 9 = r_has_part
-    #deduction("enfant", '24', "rigoler")
-    #induction("lion", '9', "poils")
-    inferencesTotal("chocolat", '9', "lait", True)

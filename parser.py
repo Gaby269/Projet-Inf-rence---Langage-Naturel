@@ -34,7 +34,8 @@ def rechercheDUMP(mots,
 
     for mot in mots:
         # Si le mot a pas deja été trouvé
-        if (not os.path.exists(f"dump_files/selected_{motFormater(mot)}.txt") or (overwrite == True)):
+        chemin = os.path.join("dump_files", f"selected_{motFormater(mot)}.txt")
+        if (not os.path.exists(chemin) or (overwrite == True)):
             id = ""
             if (id_relation != -1):
                 id = str(id_relation)
@@ -106,14 +107,12 @@ def rechercheDUMP(mots,
             print(f"   Le fichier dump_files/selected_{motFormater(mot)}.txt existe déjà\n")
 
 
-def rechercheFilterDUMP(mot,
-                  overwrite=False,
-                  id_relation=-1,
-                  with_sortante=True, 
-                  with_entrante=True):
+
+def rechercheFilterDUMP(mot, overwrite=False, id_relation=-1, with_sortante=True, with_entrante=True) :
 
     # Si le mot a pas deja été trouvé
-    if (not os.path.exists(f"filter_files/filter_{motFormater(mot)}_{id_relation}_{with_sortante}_{with_entrante}.txt") or (overwrite == True)):
+    chemin = os.path.join("filter_files", f"filter_{motFormater(mot)}_{id_relation}_{with_sortante}_{with_entrante}.txt")
+    if (not os.path.exists(chemin) or (overwrite == True)):
         id = ""
         if (id_relation != -1):
             id = str(id_relation)
@@ -171,6 +170,97 @@ def rechercheFilterDUMP(mot,
     else :
         print(f"\n   Le fichier filter_files/filter_{motFormater(mot)}_{id_relation}_{with_sortante}_{with_entrante}.txt existe déjà")
 
+
+# Fonction qui nous sert à donner une réponse
+def rechercheDUMPreponse(mot1, id_relation, mot2) :
+    # Si le mot a pas deja été trouvé
+    chemin = os.path.join("response_files", f"reponse_{motFormater(mot1)}_{id_relation}_{motFormater(mot2)}.txt")
+    if (not os.path.exists(chemin)):
+        id = ""
+        if (id_relation != -1):
+            id = str(id_relation)
+
+        # Faire la requête HTTP
+        url = "https://www.jeuxdemots.org/rezo-dump.php?gotermsubmit=Chercher&gotermrel=" + mot1 + "&rel=" + id + "&relin=norelin"
+        print(url)
+
+        selected = "MUTED_PLEASE_RESEND"
+        while ("MUTED_PLEASE_RESEND" in selected):
+            response = requests.get(url)
+    
+            # Recuperation des données de reseauDump dans body
+            body = response.text
+    
+            # Recherche de la position de la première occurrence de la balise <CODE> pour récuperer les choses à l'interieur
+            start_index = body.find("<CODE>")
+    
+            # Recuperation du texte du code source
+            selected = ""
+    
+            # Si le mot existe dans la base
+            if start_index != -1:
+                end_index = body.find("</CODE>", start_index)
+    
+                if end_index != -1:
+                    # Extraction du contenu entre les balises <CODE> et </CODE>
+                    selected = body[start_index+6:end_index] # On rajoute la longueur de la balise <CODE>
+    
+            # Sinon on regarde s'il y a un message d'erreur qui dit que le mot n'existe pas
+            else:
+                start_index_warning = body.find(u"""<div class="jdm-warning">""")
+                if start_index_warning != -1:
+                    print(f"\nLe mot {mot1} n'existe pas veuillez changer la phrase")
+                else:
+                    print("\nErreur lors de la requête")
+                exit(1)
+
+        body = selected[:-7]
+        
+        poid = -1
+        idMot2 = -1
+        idMot1 = -1
+        
+        # Recherche de l'id de lentite du mot2
+        entite = body.find(f"'{mot2}'")
+        if entite != -1:
+            end_entite = body.rfind("e", 0, entite) #je veux les élément avant entite et apres la premiere occurence de e avant
+            if end_entite != -1:
+                selected = body[end_entite+2:entite-1]
+            idMot2 = selected
+        
+            # Recherche de l'id du mot1
+            idMot1 = body.find("eid=") # trouver l'id du mot1
+            if idMot1 != -1:
+                end_id = body.find(")", idMot1)
+                if end_id != -1:
+                    selected = body[idMot1+4:end_id]
+            idMot1 = selected
+        
+            # Recherche de la relation associé
+            relation = body.find(f"{idMot1};{idMot2};6")
+            if relation != -1:
+                end_relation = body.find("r", relation)
+                if end_relation != -1:
+                    selected = body[relation+len(idMot1)+len(idMot2)+4:end_relation-1]
+            poid = selected
+        
+
+            # Ecriture de la réponse
+            chemin = os.path.join("reponse_files", f"reponse_{motFormater(mot1)}_{id_relation}_{motFormater(mot2)}.txt")
+            with open(chemin, "w", encoding="utf-8") as f:
+                if int(poid) >= 0: # On considere que si la relation est à 0 elle est vrai
+                    f.write("True")
+                else:
+                    f.write("False")
+        else :
+            # Ecriture de la reponse étant fausse
+            chemin = os.path.join("reponse_files", f"reponse_{motFormater(mot1)}_{id_relation}_{motFormater(mot2)}.txt")
+            with open(chemin, "w", encoding="utf-8") as f:
+                f.write("Pas")
+                            
+        print(f"\n\n   La réponse de si {mot1} {id_relation} {mot2} a été récupérées.\n\n")
+    else :
+        print(f"\n   Le fichier reponse_files/reponse_{motFormater(mot1)}_{id_relation}_{motFormater(mot2)}.txt existe déjà")
 
 #Fonction qui forme le texte en dico
 def formaterDico(phr, filter=False, id_relation=-1, with_sortante=True, with_entrante=True):
@@ -305,12 +395,10 @@ def parserDico(dico,
                 # Choix des relations
                 if tab[0] == 'r' and tab[4] == valeur_trie:
                     # Si on choisis les relation sortantes + Si c'est bien la clé pour les relations sortantes (4)
-                    if is_sortante and key[0] == '4' and tab not in tab_sortantes and int(
-                      tab[5]) > 0 :
+                    if is_sortante and key[0] == '4' and tab not in tab_sortantes and int(tab[5]) > 0 :
                         tab_sortantes.append(tab)
                     # Si c'est une relation et que la relation est de type relation + Si c'est bien la clé pour les relations entrantes (5)
-                    if is_entrante and key[0] == '5' and tab not in tab_entrantes and int(
-                      tab[5]) > 0:
+                    if is_entrante and key[0] == '5' and tab not in tab_entrantes and int(tab[5]) > 0:
                         tab_entrantes.append(tab)
                 # Choix les entités
                 if tab[0] == 'e':
@@ -365,7 +453,6 @@ def rechercheASK(mot1, relation, mot2) :
         
 	# URL pour chercher si la relation 
     url = "https://www.jeuxdemots.org/rezo-ask.php?gotermsubmit=Demander&term1="+mot1+"&rel="+relation+"&term2="+mot2
-    #print(url)
     response = requests.get(url)
 
 	# Recuperation des données de reseauDump dans body
@@ -445,10 +532,3 @@ def rechercheASK(mot1, relation, mot2) :
         f.write(f"{r}\n{w}\n{anot}")
 
     return r, w, anot
-
-
-
-if __name__ == "__main__":
-    rechercheASK("singe","r_isa", "vache")
-
-# // DUMP pour le terme 'pigeon' (eid=74657)

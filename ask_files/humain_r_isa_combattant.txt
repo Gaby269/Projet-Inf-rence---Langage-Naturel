@@ -1,0 +1,3 @@
+oui
+60
+inférence depuis 'hypo : gladiateur r_isa combattant' ; 

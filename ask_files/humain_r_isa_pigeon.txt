@@ -1,0 +1,3 @@
+oui
+23
+inférence depuis 'target : humain r_isa individu' ; 

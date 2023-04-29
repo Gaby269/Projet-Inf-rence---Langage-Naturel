@@ -1,0 +1,3 @@
+oui
+15
+inférence depuis 'target : humain r_isa être humain>homme' ; 

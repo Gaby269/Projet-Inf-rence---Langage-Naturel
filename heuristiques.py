@@ -57,27 +57,18 @@ def heuristiquePourcentageDump(mot1, relation, mot2, tab_iprim):
     for i in range(len(tab_iprim)):
 
         print("\n\n")
-        #print(tab_iprim[i])
 
         # Recuperation du nombre total de A
         # en récupérant les relations sortantes de A (par ex : animaux)
         rechercheFilterDUMP(tab_iprim[i], id_relation=6, with_sortante=False)
-        dicoFilterIprim = formaterDico([tab_iprim[i]],
-                                       filter=True,
-                                       id_relation=6,
-                                       with_sortante=False)[tab_iprim[i]]
-        entiteFilterIprim = dicoFilterIprim[
-            "2;e;eid;'name';type;w;'formated name'"]
+        dicoFilterIprim = formaterDico([tab_iprim[i]],filter=True,id_relation=6,with_sortante=False)[tab_iprim[i]]
+        entiteFilterIprim = dicoFilterIprim["2;e;eid;'name';type;w;'formated name'"]
 
         # Recuperation des iprim qui sont en relation avec B (par ex : lion qui peut rugir)
         # en récuperant les relation entrantent de B (par ex : de rugir)
         rechercheFilterDUMP(mot2, id_relation=relation, with_sortante=False)
-        dicoFilterMot2 = formaterDico([mot2],
-                                      filter=True,
-                                      id_relation=relation,
-                                      with_sortante=False)[mot2]
-        entiteFilterMot2 = dicoFilterMot2[
-            "2;e;eid;'name';type;w;'formated name'"]
+        dicoFilterMot2 = formaterDico([mot2],filter=True,id_relation=relation,with_sortante=False)[mot2]
+        entiteFilterMot2 = dicoFilterMot2["2;e;eid;'name';type;w;'formated name'"]
 
         # Tableau d'intersection entre l'ensemble de tous les A sortant et de tous les B entrants (par ex : tous les animaux possible et ceux qui peuvent rugir)
         intersection = calculIntersection(entiteFilterIprim, entiteFilterMot2)
@@ -88,10 +79,6 @@ def heuristiquePourcentageDump(mot1, relation, mot2, tab_iprim):
         nb_entite_iprimMot2 = len(
             intersection)  # nombre de B (par ex : peuvent rugir)
         pourcentage.append(nb_entite_iprimMot2 * 100 / nb_entiteTotal_iprim)  # calcul du pourcentage final
-
-        #print(f"nbTotal de {tab_iprim[i]}  : ", nb_entiteTotal_iprim)
-        #print("nbTrier : ",nb_entite_iprimMot2)
-        #print("Pourcentage : ", (nb_entite_iprimMot2 / nb_entiteTotal_iprim)*100)
 
     return pourcentage
 
@@ -105,18 +92,8 @@ def calculNoteRelation(
     if use_ask :
         tab_note = heuristiqueAnnotationAsk(tab_ask, tab_note)
     if use_pourcentage :
-        tab_pourcentage = heuristiquePourcentageDump(mot1, relation, mot2,
-                                                tab_iprim)
+        tab_pourcentage = heuristiquePourcentageDump(mot1, relation, mot2,tab_iprim)
     else :
         tab_pourcentage = [0]*len(tab_note)
 
     return tab_note, tab_pourcentage
-
-
-# Test pour les fonctions
-if __name__ == "__main__":
-    heuristiquePourcentageDump("lion", '24', "rugir", [
-        'animal', 'animal sauvage', 'félin', 'félin>17559', 'fauve', 'félidé',
-        'féliforme', 'féloïdé', 'homme', 'individu'
-    ], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-    #['animal', 'animal sauvage', 'félin', 'félin>17559', 'fauve', 'félidé', 'féliforme', 'féloïdé', 'homme', 'individu']

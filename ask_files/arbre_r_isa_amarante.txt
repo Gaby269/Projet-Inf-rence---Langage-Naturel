@@ -1,0 +1,3 @@
+non
+-106
+inférence depuis 'target : arbre r_isa animal' ; 

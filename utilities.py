@@ -122,8 +122,7 @@ def traductionChiffreToFrancais(mot):
             if relation == mot:
                 return id
 
-    relation = input(
-        f"{mot} Veuillez donner une bonne relation (chiffre to francais) :")
+    relation = input(f"{mot} Veuillez donner une bonne relation (chiffre to francais) :")
     return traductionChiffreToRelation(relation)
 
 
@@ -178,15 +177,11 @@ def tri_relations(tab):
 
 
 # Fonction qui trie les explications 
-def triageExplication(mot1, mot2, relationString, tab_iprim, tab_note,
-                      tab_pourcentage, tab_triplet2):
+def triageExplication(mot1, mot2, relationString, tab_iprim, tab_note,tab_pourcentage, tab_triplet2):
     # Trier les explications
-    relations_triees = [
-    ]  # [mot1, iprim, relation, mot2, noteClassement, poidFrequence]
-    for iprim, noteExplication, tab2, pourcentage in zip(
-            tab_iprim, tab_note, tab_triplet2, tab_pourcentage):
-        relations_triees.append(
-            [mot1, iprim, relationString, mot2, noteExplication, pourcentage])
+    relations_triees = []  # [mot1, iprim, relation, mot2, noteClassement, poidFrequence]
+    for iprim, noteExplication, tab2, pourcentage in zip(tab_iprim, tab_note, tab_triplet2, tab_pourcentage):
+        relations_triees.append([mot1, iprim, relationString, mot2, noteExplication, pourcentage])
 
     # Tri du tableau en fonction des notes des explications, puis en fonction des poids d'annotation si égalité
     relations_triees.sort(key=tri_relations)
