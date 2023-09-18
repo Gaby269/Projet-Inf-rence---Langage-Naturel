@@ -26,4 +26,4 @@ Valeur par défault est "non" si vous n'entrez pas de valeur.
 
 - **_Relation d'égalité_** : exemple "chocolat est du chocolat" [y/n]
 - **_Heuristique de pourcentage_ (très long)** : exemple 50% des animaux sont des animaux qui volent parmis les animaux
-- **_Heuritique sur les annotations_** : [3] par défault pour les deux
+- **_Heuristique sur les annotations_** : [3] par défault pour les deux
